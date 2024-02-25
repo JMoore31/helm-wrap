@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
 use std::io::Write;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Releases {
     pub releases: Vec<Release>,
