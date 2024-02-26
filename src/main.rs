@@ -1,6 +1,6 @@
 mod yaml;
 
-use yaml::{file_to_releases, Release, Releases, Repositories, Repository};
+use yaml::{file_to_releases,Repositories, Repository};
 
 use crate::yaml::yaml_to_file;
 fn main() {
