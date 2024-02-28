@@ -5,4 +5,5 @@ namespace mongodb
 name kafka
 chart bitnami/kafka
 namespace kafka
+needs mongodb/mongodb kafka/kafka
 ---

@@ -13,6 +13,7 @@ pub struct Release {
     pub name: String,
     pub chart: String,
     pub namespace: String,
+    pub needs: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,6 +26,7 @@ pub struct Repository {
     pub name: String,
     pub url: String,
 }
+
 
 impl Releases {
     pub fn new() -> Self {
@@ -77,6 +79,11 @@ pub fn file_to_releases()-> Releases{
             "name" => release.name = (pair[1]).to_string(),
             "chart" => release.chart = (pair[1]).to_string(),
             "namespace" => release.namespace = (pair[1]).to_string(),
+            "needs" => {
+                for n in 1..pair.len(){
+                    release.needs.push(pair[n].to_string());
+                }
+            }
             "---" => {
                 releases.add_release(release);
                 release = Release::default(); 
