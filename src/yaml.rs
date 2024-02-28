@@ -77,9 +77,14 @@ pub fn file_to_releases()-> Releases{
             "name" => release.name = (pair[1]).to_string(),
             "chart" => release.chart = (pair[1]).to_string(),
             "namespace" => release.namespace = (pair[1]).to_string(),
+            "---" => {
+                releases.add_release(release);
+                release = Release::default(); 
+            }
             _ => println!("Unidentified key in pair"),
         }
     }
-    releases.add_release(release);
+    
+    println!("{:?}",releases);
     releases
 }

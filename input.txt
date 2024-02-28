@@ -1,3 +1,8 @@
 name mongodb
 chart bitnami/mongodb
 namespace mongodb
+---
+name kafka
+chart bitnami/kafka
+namespace kafka
+---
