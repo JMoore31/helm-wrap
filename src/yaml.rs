@@ -27,6 +27,11 @@ pub struct Repository {
     pub url: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Helmfile {
+    repositories: Repositories,
+    releases: Releases,
+}
 
 impl Releases {
     pub fn new() -> Self {
@@ -49,28 +54,26 @@ impl Repositories {
         self.repositories.push(repository);
     }
 }
-pub fn yaml_to_file(
-    release_list: Releases,
-    repository_list: Repositories,
-) -> Result<(), serde_yaml::Error> {
+pub fn yaml_to_file(helmfile: Helmfile) -> Result<(), serde_yaml::Error> {
     let separator = "---\n".as_bytes();
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create(true)
         .open("helmfile.yaml")
         .expect("Could not open new file");
-    serde_yaml::to_writer(&file, &repository_list).unwrap();
+    serde_yaml::to_writer(&file, &helmfile.repositories).unwrap();
     let _ = &file.write_all(separator);
-    serde_yaml::to_writer(&file, &release_list).unwrap();
+    serde_yaml::to_writer(&file, &helmfile.releases).unwrap();
     Ok(())
 }
 
 
-pub fn file_to_releases()-> Releases{
+pub fn file_to_releases()-> Helmfile{
     let file = std::fs::OpenOptions::new().read(true).open("input.txt").unwrap();
     let reader = BufReader::new(&file);
     let mut releases = Releases::new();
     let mut release = Release::default();
+    let mut repositories = Repositories::new();
     for line in reader.lines(){
         let split = line.unwrap();
         let split = split.split_whitespace();
@@ -84,6 +87,10 @@ pub fn file_to_releases()-> Releases{
                     release.needs.push(pair[n].to_string());
                 }
             }
+            "repository" => repositories.add_repository(Repository{
+                name: pair[1].to_string(),
+                url: pair[2].to_string(),
+            }),
             "---" => {
                 releases.add_release(release);
                 release = Release::default(); 
@@ -93,5 +100,9 @@ pub fn file_to_releases()-> Releases{
     }
     
     println!("{:?}",releases);
-    releases
+    let helmfile = Helmfile {
+        releases: releases,
+        repositories: repositories,
+    };
+    helmfile
 }
