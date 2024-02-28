@@ -6,6 +6,10 @@ releases:
 - name: mongodb
   chart: bitnami/mongodb
   namespace: mongodb
+  needs: []
 - name: kafka
   chart: bitnami/kafka
   namespace: kafka
+  needs:
+  - mongodb/mongodb
+  - kafka/kafka
