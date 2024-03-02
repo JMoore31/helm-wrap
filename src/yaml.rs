@@ -1,7 +1,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
-use std::io::{BufRead, BufReader,Write};
+use std::{io::{BufRead, BufReader,Write}};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Releases {
@@ -33,6 +33,23 @@ pub struct Helmfile {
     releases: Releases,
 }
 
+impl Helmfile {
+    pub fn new() -> Self{
+        Helmfile {
+            releases: Releases::new(),
+            repositories: Repositories::new(),
+        }
+    }
+    fn cli_add_release(&mut self){
+        todo!();
+    }
+    fn cli_add_repository(&mut self){
+        todo!();
+    }
+    fn print_releases(&mut self){
+        todo!();
+    }
+}
 impl Releases {
     pub fn new() -> Self {
         Releases {
@@ -66,8 +83,31 @@ pub fn yaml_to_file(helmfile: Helmfile) -> Result<(), serde_yaml::Error> {
     serde_yaml::to_writer(&file, &helmfile.releases).unwrap();
     Ok(())
 }
+pub fn menu() -> String {
+    println!("-----------------");
+    println!("Helm-Wrap Menu\n1) Add a new release\n2) Add a Repository\n3) Print Releases\n4) Finalise choices");
+    println!("-----------------");
+    let mut line = String::new();
+    let stdin = std::io::stdin();
+    stdin.lock().read_line(&mut line).unwrap();
+    line
+}
 
+pub fn input_to_helmfile()-> Helmfile {
+    let mut helmfile = Helmfile::new();
+    match menu().as_ref() {
+        "1" => helmfile.cli_add_release(),
+        "2" => helmfile.cli_add_repository(),
+        "3" => helmfile.print_releases(),
+        "4" => (),
+        _ => {
+            println!("Not a valid input, try again");
 
+        }
+    }
+    let mut releases = Releases::new();
+    helmfile
+}
 pub fn file_to_releases()-> Helmfile{
     let file = std::fs::OpenOptions::new().read(true).open("input.txt").unwrap();
     let reader = BufReader::new(&file);

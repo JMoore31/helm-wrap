@@ -1,6 +1,5 @@
 mod yaml;
-
-use yaml::file_to_releases;
+use yaml::{file_to_releases, menu};
 
 use crate::yaml::yaml_to_file;
 fn main() {
