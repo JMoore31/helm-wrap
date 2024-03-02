@@ -7,9 +7,12 @@ releases:
   chart: bitnami/mongodb
   namespace: mongodb
   needs: []
+  values: []
 - name: kafka
   chart: bitnami/kafka
   namespace: kafka
   needs:
   - mongodb/mongodb
   - kafka/kafka
+  values:
+  - values.yaml

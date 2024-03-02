@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
 use std::{io::{BufRead, BufReader,Write}};
@@ -14,6 +13,7 @@ pub struct Release {
     pub chart: String,
     pub namespace: String,
     pub needs: Vec<String>,
+    pub values: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -114,7 +114,7 @@ pub fn file_to_releases()-> Helmfile{
     let mut releases = Releases::new();
     let mut release = Release::default();
     let mut repositories = Repositories::new();
-    for line in reader.lines(){
+    for line in reader.lines() {
         let split = line.unwrap();
         let split = split.split_whitespace();
         let pair = split.collect::<Vec<&str>>();
@@ -123,23 +123,28 @@ pub fn file_to_releases()-> Helmfile{
             "chart" => release.chart = (pair[1]).to_string(),
             "namespace" => release.namespace = (pair[1]).to_string(),
             "needs" => {
-                for n in 1..pair.len(){
+                for n in 1..pair.len() {
                     release.needs.push(pair[n].to_string());
                 }
             }
-            "repository" => repositories.add_repository(Repository{
+            "values" => {
+                for n in 1..pair.len() {
+                    release.values.push(pair[n].to_string());
+                }
+            }
+            "repository" => repositories.add_repository(Repository {
                 name: pair[1].to_string(),
                 url: pair[2].to_string(),
             }),
             "---" => {
                 releases.add_release(release);
-                release = Release::default(); 
+                release = Release::default();
             }
             _ => println!("Unidentified key in pair"),
         }
     }
-    
-    println!("{:?}",releases);
+
+    println!("{:?}", releases);
     let helmfile = Helmfile {
         releases: releases,
         repositories: repositories,
