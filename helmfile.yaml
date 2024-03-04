@@ -16,3 +16,8 @@ releases:
   - kafka/kafka
   values:
   - values.yaml
+- name: kafka
+  chart: test/kafka
+  namespace: kafka
+  needs: []
+  values: []

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
-use std::{io::{BufRead, BufReader,Write}};
+use std::io::{BufRead, BufReader, Read, Write};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Releases {
@@ -41,7 +41,7 @@ impl Helmfile {
         }
     }
     fn cli_add_release(&mut self){
-        todo!();
+        self.releases.add_release(release_menu());
     }
     fn cli_add_repository(&mut self){
         todo!();
@@ -50,6 +50,7 @@ impl Helmfile {
         todo!();
     }
 }
+
 impl Releases {
     pub fn new() -> Self {
         Releases {
@@ -91,6 +92,22 @@ pub fn menu() -> String {
     let stdin = std::io::stdin();
     stdin.lock().read_line(&mut line).unwrap();
     line
+}
+fn release_menu()-> Release{
+    let mut release = Release::default();
+    println!("-----------------");
+    println!("What is the release name?");
+    let stdin = std::io::stdin();
+    stdin.lock().read_line(&mut release.name).unwrap();
+    release.name.truncate((release.name.len()-2));
+    println!("What is the chart? (Format bitnami/kafka for example");
+    stdin.lock().read_line(&mut release.chart).unwrap();
+    release.chart.truncate((release.chart.len()-2));
+    println!("And the namespace?");
+    stdin.lock().read_line(&mut release.namespace).unwrap();
+    release.namespace.truncate((release.namespace.len()-2));
+    release
+    
 }
 
 pub fn input_to_helmfile()-> Helmfile {
@@ -145,9 +162,10 @@ pub fn file_to_releases()-> Helmfile{
     }
 
     println!("{:?}", releases);
-    let helmfile = Helmfile {
+    let mut helmfile = Helmfile {
         releases: releases,
         repositories: repositories,
     };
+    helmfile.cli_add_release();
     helmfile
 }
