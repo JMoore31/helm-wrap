@@ -46,17 +46,32 @@ impl Helmfile {
     fn cli_add_repository(&mut self){
         self.repositories.add_repository(repository_menu());
     }
-    fn print_releases(&mut self){
-        todo!();
+    fn print(&self){
+        for repo in &self.repositories.repositories{
+            repo.print();
+        }
+        for release in &self.releases.releases{
+            release.print();
+        }
     }
 }
-
+impl Release {
+    fn print(&self){
+        println!("Release -- Name: {} -- Chart: {} -- Namespace {}",self.name,self.chart,self.namespace);
+    }
+}
+impl Repository{
+    fn print(&self){
+        println!("Repository -- Name: {} -- Url: {}",self.name,self.url);
+    }
+}
 impl Releases {
     pub fn new() -> Self {
         Releases {
             releases: Vec::new(),
         }
     }
+    
     pub fn add_release(&mut self, release: Release) {
         self.releases.push(release);
     }
@@ -132,7 +147,7 @@ pub fn input_to_helmfile()-> Helmfile {
         match menu(){
             1 => helmfile.cli_add_release(),
             2 => helmfile.cli_add_repository(),
-            3 => helmfile.print_releases(),
+            3 => helmfile.print(),
             4 => break,
             _ => {
                 println!("Not a valid input, try again");
