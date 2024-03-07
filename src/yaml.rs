@@ -84,14 +84,17 @@ pub fn yaml_to_file(helmfile: Helmfile) -> Result<(), serde_yaml::Error> {
     serde_yaml::to_writer(&file, &helmfile.releases).unwrap();
     Ok(())
 }
-pub fn menu() -> String {
+pub fn menu() -> i32 {
     println!("-----------------");
     println!("Helm-Wrap Menu\n1) Add a new release\n2) Add a Repository\n3) Print Releases\n4) Finalise choices");
     println!("-----------------");
     let mut line = String::new();
     let stdin = std::io::stdin();
     stdin.lock().read_line(&mut line).unwrap();
-    line
+    println!("{line}");
+    line.truncate(line.len()-2);
+    let int = line.parse::<i32>().unwrap();
+    int
 }
 fn release_menu()-> Release{
     let mut release = Release::default();
@@ -112,17 +115,18 @@ fn release_menu()-> Release{
 
 pub fn input_to_helmfile()-> Helmfile {
     let mut helmfile = Helmfile::new();
-    match menu().as_ref() {
-        "1" => helmfile.cli_add_release(),
-        "2" => helmfile.cli_add_repository(),
-        "3" => helmfile.print_releases(),
-        "4" => (),
-        _ => {
-            println!("Not a valid input, try again");
+    loop {
+        match menu(){
+            1 => helmfile.cli_add_release(),
+            2 => helmfile.cli_add_repository(),
+            3 => helmfile.print_releases(),
+            4 => break,
+            _ => {
+                println!("Not a valid input, try again");
 
+            }
         }
-    }
-    let mut releases = Releases::new();
+    } 
     helmfile
 }
 pub fn file_to_releases()-> Helmfile{
