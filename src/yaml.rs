@@ -21,7 +21,7 @@ pub struct Repositories {
     pub repositories: Vec<Repository>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Repository {
     pub name: String,
     pub url: String,
@@ -44,7 +44,7 @@ impl Helmfile {
         self.releases.add_release(release_menu());
     }
     fn cli_add_repository(&mut self){
-        todo!();
+        self.repositories.add_repository(repository_menu());
     }
     fn print_releases(&mut self){
         todo!();
@@ -110,6 +110,19 @@ fn release_menu()-> Release{
     stdin.lock().read_line(&mut release.namespace).unwrap();
     release.namespace.truncate((release.namespace.len()-2));
     release
+    
+}
+fn repository_menu()-> Repository{
+    let mut repo = Repository::default();
+    println!("-----------------");
+    println!("What is the repo name?");
+    let stdin = std::io::stdin();
+    stdin.lock().read_line(&mut repo.name).unwrap();
+    repo.name.truncate((repo.name.len()-2));
+    println!("What is the url?");
+    stdin.lock().read_line(&mut repo.url).unwrap();
+    repo.url.truncate((repo.url.len()-2));
+    repo
     
 }
 
