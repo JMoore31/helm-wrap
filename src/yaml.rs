@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_yaml::{self};
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{BufRead, BufReader,Write};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Releases {
@@ -87,7 +87,7 @@ impl Repositories {
         self.repositories.push(repository);
     }
 }
-pub fn yaml_to_file(helmfile: Helmfile) -> Result<(), serde_yaml::Error> {
+pub fn to_file(helmfile: &Helmfile){
     let separator = "---\n".as_bytes();
     let mut file = std::fs::OpenOptions::new()
         .write(true)
@@ -97,7 +97,6 @@ pub fn yaml_to_file(helmfile: Helmfile) -> Result<(), serde_yaml::Error> {
     serde_yaml::to_writer(&file, &helmfile.repositories).unwrap();
     let _ = &file.write_all(separator);
     serde_yaml::to_writer(&file, &helmfile.releases).unwrap();
-    Ok(())
 }
 pub fn menu() -> i32 {
     println!("-----------------");
@@ -108,8 +107,7 @@ pub fn menu() -> i32 {
     stdin.lock().read_line(&mut line).unwrap();
     println!("{line}");
     line.truncate(line.len()-2);
-    let int = line.parse::<i32>().unwrap();
-    int
+    line.parse::<i32>().unwrap()
 }
 fn release_menu()-> Release{
     let mut release = Release::default();
@@ -117,13 +115,13 @@ fn release_menu()-> Release{
     println!("What is the release name?");
     let stdin = std::io::stdin();
     stdin.lock().read_line(&mut release.name).unwrap();
-    release.name.truncate((release.name.len()-2));
+    release.name.truncate(release.name.len()-2);
     println!("What is the chart? (Format bitnami/kafka for example");
     stdin.lock().read_line(&mut release.chart).unwrap();
-    release.chart.truncate((release.chart.len()-2));
+    release.chart.truncate(release.chart.len()-2);
     println!("And the namespace?");
     stdin.lock().read_line(&mut release.namespace).unwrap();
-    release.namespace.truncate((release.namespace.len()-2));
+    release.namespace.truncate(release.namespace.len()-2);
     release
     
 }
@@ -133,10 +131,10 @@ fn repository_menu()-> Repository{
     println!("What is the repo name?");
     let stdin = std::io::stdin();
     stdin.lock().read_line(&mut repo.name).unwrap();
-    repo.name.truncate((repo.name.len()-2));
+    repo.name.truncate(repo.name.len()-2);
     println!("What is the url?");
     stdin.lock().read_line(&mut repo.url).unwrap();
-    repo.url.truncate((repo.url.len()-2));
+    repo.url.truncate(repo.url.len()-2);
     repo
     
 }
@@ -157,47 +155,40 @@ pub fn input_to_helmfile()-> Helmfile {
     } 
     helmfile
 }
-pub fn file_to_releases()-> Helmfile{
+pub fn file_to_helmfile()-> Helmfile{
     let file = std::fs::OpenOptions::new().read(true).open("input.txt").unwrap();
     let reader = BufReader::new(&file);
-    let mut releases = Releases::new();
     let mut release = Release::default();
-    let mut repositories = Repositories::new();
+    let mut helmfile = Helmfile::new();
     for line in reader.lines() {
         let split = line.unwrap();
         let split = split.split_whitespace();
         let pair = split.collect::<Vec<&str>>();
-        match pair[0] {
-            "name" => release.name = (pair[1]).to_string(),
-            "chart" => release.chart = (pair[1]).to_string(),
-            "namespace" => release.namespace = (pair[1]).to_string(),
-            "needs" => {
-                for n in 1..pair.len() {
-                    release.needs.push(pair[n].to_string());
+        match pair.first() {
+            Some(&"name") => release.name = (pair[1]).to_string(),
+            Some(&"chart") => release.chart = (pair[1]).to_string(),
+            Some(&"namespace") => release.namespace = (pair[1]).to_string(),
+            Some(&"needs") => {
+                for need in pair.iter().skip(1) {
+                    release.needs.push((*need).to_string());
                 }
             }
-            "values" => {
-                for n in 1..pair.len() {
-                    release.values.push(pair[n].to_string());
+            Some(&"values") => {
+                for value in pair.iter().skip(1) {
+                    release.values.push((*value).to_string());
                 }
             }
-            "repository" => repositories.add_repository(Repository {
+            Some(&"repository") => helmfile.repositories.add_repository(Repository {
                 name: pair[1].to_string(),
                 url: pair[2].to_string(),
             }),
-            "---" => {
-                releases.add_release(release);
+            Some(&"---") => {
+                helmfile.releases.add_release(release);
                 release = Release::default();
             }
+            None => println!("Pair not found"),
             _ => println!("Unidentified key in pair"),
         }
     }
-
-    println!("{:?}", releases);
-    let mut helmfile = Helmfile {
-        releases: releases,
-        repositories: repositories,
-    };
-    helmfile.cli_add_release();
     helmfile
 }
