@@ -111,17 +111,27 @@ pub fn menu() -> i32 {
 }
 fn release_menu()-> Release{
     let mut release = Release::default();
+    let mut need = String::new();
     println!("-----------------");
     println!("What is the release name?");
     let stdin = std::io::stdin();
     stdin.lock().read_line(&mut release.name).unwrap();
-    release.name.truncate(release.name.len()-2);
+    
     println!("What is the chart? (Format bitnami/kafka for example");
     stdin.lock().read_line(&mut release.chart).unwrap();
-    release.chart.truncate(release.chart.len()-2);
+    
     println!("And the namespace?");
     stdin.lock().read_line(&mut release.namespace).unwrap();
+
+    println!("Does it have a need? (in namespace/name format)");
+    stdin.lock().read_line(&mut need).unwrap();
+    need.truncate(need.len()-2);
+
+
+    release.name.truncate(release.name.len()-2);
     release.namespace.truncate(release.namespace.len()-2);
+    release.chart.truncate(release.chart.len()-2);
+    release.needs.push(need);
     release
     
 }
